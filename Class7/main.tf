@@ -2,11 +2,39 @@ provider aws {
   region = "us-east-2"
 }
 
+resource "aws_key_pair" "deployer" {
+  key_name   = "deployer-key"
+  public_key = file("~/.ssh/id_rsa.pub")
+}
+
 resource "aws_instance" "web" {
   ami           = "ami-0900fe555666598a2"
   instance_type = "t2.micro"
-
-  provisioner "local-exec" {
-    command = "mkdir kaizen && touch hello"
-  }
+  vpc_security_group_ids = [aws_security_group.allow_tls.id]
+  key_name = aws_key_pair.deployer.key_name
 }
+#    connection {
+#     type     = "ssh"    #ssh ec2-user@143.45.45.56
+#     user     = "ec2-user"
+#     private_key = file("~/.ssh/id_rsa")
+#     host     = self.public_ip
+#   }
+   
+#   provisioner "file" {
+#     source = "./httpd.sh"         #local machine
+#     destination = "./httpd.sh"    #remote machine 
+#   }
+
+
+#   provisioner "remote-exec" {
+#    inline = [ 
+#     "sudo yum install git -y"
+#    ]
+#   }
+# }
+
+# resource "null_resource" "hello" {
+#     provisioner "local-exec" {
+#     command = "mkdir kaizen && touch hello"
+#   }
+# }
